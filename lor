@@ -1,0 +1,21 @@
+
+PresentParser
+[32m  has a total_area attribute that is a number[0m
+[31m  can find the area of a present from an array of side lengths (FAILED - 1)[0m
+
+Failures:
+
+  1) PresentParser can find the area of a present from an array of side lengths
+     [31mFailure/Error: [0m@present_tracker.find_area([[1;34m3[0m, [1;34m2[0m, [1;34m4[0m])[0m
+     [31m[0m
+     [31mNoMethodError:[0m
+     [31m  undefined method `find_area' for #<PresentParser:0x00007f9568c0afa8 @total_area=0>[0m
+     [36m# ./spec/day_2/solution_spec.rb:17:in `block (2 levels) in <top (required)>'[0m
+
+Finished in 0.00206 seconds (files took 0.17717 seconds to load)
+[31m2 examples, 1 failure[0m
+
+Failed examples:
+
+[31mrspec ./spec/day_2/solution_spec.rb:16[0m [36m# PresentParser can find the area of a present from an array of side lengths[0m
+
