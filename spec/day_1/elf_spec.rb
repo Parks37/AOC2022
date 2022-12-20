@@ -1,6 +1,6 @@
 require_relative '../../lib/day_1/elf'
 
-describe Day1::Elf do
+RSpec.describe Day1::Elf do
   it 'has a total_calories method' do
     expect(described_class.new).to respond_to(:total_calories)
   end

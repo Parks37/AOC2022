@@ -1,7 +1,7 @@
 require 'byebug'
 require_relative '../../lib/day_1/elf_tracker'
 
-describe Day1::Expedition do
+RSpec.describe Day1::Expedition do
   it 'makes an elf for each entry in the input file'do
     tracker = described_class.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
     expect(tracker.elves.count).to eq(5)
