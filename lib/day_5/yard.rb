@@ -105,21 +105,27 @@ module Day5
     end
 
     def load_stacks(commands)
-      loader = Day5::Loader.new(@state)
       commands.each do |command|
-        @state = loader.load_stacks(loader.parse(command))
+        loader = Day5::Loader.new(@state)
+        stacks = loader.parse(command)
+        @state = loader.load_stacks(stacks)
       end
     end
 
     def move_boxes(commands)
+      commands.each do |command|
+        mover = fetch_mover
+        quantity, source, destination = mover.parse(command)
+        @state = mover.move(quantity, source, destination)
+      end
+    end
+
+    def fetch_mover
       case @model_number
       when 9000
-        mover = Day5::Mover9000.new(@state)
+        Day5::Mover9000.new(@state)
       when 9001
-        mover = Day5::Mover9001.new(@state)
-      end
-      commands.each do |command|
-        @state = mover.move(*mover.parse(command))
+        Day5::Mover9001.new(@state)
       end
     end
 
