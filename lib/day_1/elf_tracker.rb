@@ -11,9 +11,9 @@ module Day1
 
       File.readlines(input_file).each do |line|
         if line.match(/(\d+)/)
-          @elves[-1].add_food_item($1.to_i)
+          elves[-1].add_food_item($1.to_i)
         else
-          @elves << Elf.new
+          elves << Elf.new
         end
       end
     end

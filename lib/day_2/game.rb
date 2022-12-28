@@ -23,20 +23,21 @@ module Day2
   end
 
   class Game
+    attr_reader :file
 
     def initialize(file)
       @file = file
     end
 
     def scores_for_shapes
-      File.readlines(@file).map do |line|
+      File.readlines(file).map do |line|
         opponent, player = line.split(' ').map{|x| to_shape(x).new}
         player.send(opponent.name)
       end
     end
 
     def scores_for_outcomes
-      File.readlines(@file).map do |line|
+      File.readlines(file).map do |line|
         opponent_letter, outcome_letter = line.split(' ')
         opponent = to_shape(opponent_letter).new
         outcome = to_outcome(outcome_letter)

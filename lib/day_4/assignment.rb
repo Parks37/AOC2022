@@ -1,11 +1,13 @@
 module Day4
   class Assignment
+    attr_reader :string
+
     def initialize(string)
       @string = string
     end
 
     def to_a
-      domain = @string.split('-')
+      domain = string.split('-')
       (domain[0].to_i..domain[1].to_i).to_a
     end
 
@@ -19,6 +21,8 @@ module Day4
   end
 
   class AssignmentList
+    attr_reader :file
+
     def initialize(file)
       @file = file
     end
@@ -28,7 +32,7 @@ module Day4
     end
 
     def eclipsed_assignments
-      File.readlines(@file).filter do |line|
+      File.readlines(file).filter do |line|
         domain = line.split(',')
         assignment1 = Assignment.new(domain.first)
         assignment2 = Assignment.new(domain.last)
@@ -37,7 +41,7 @@ module Day4
     end
 
     def overlapping_assignments
-      File.readlines(@file).filter do |line|
+      File.readlines(file).filter do |line|
         domain = line.split(',')
         assignment1 = Assignment.new(domain.first)
         assignment2 = Assignment.new(domain.last)

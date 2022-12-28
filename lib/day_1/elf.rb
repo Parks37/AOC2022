@@ -7,11 +7,11 @@ module Day1
     end
 
     def add_food_item(calories)
-      @food_items << calories
+      food_items << calories
     end
 
     def total_calories
-      @food_items.sum
+      food_items.sum
     end
 
     def <=>(other)

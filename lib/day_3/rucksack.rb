@@ -2,12 +2,14 @@ require 'byebug'
 
 module Day3
   class Rucksack
+    attr_reader :items
+
     def initialize(items)
       @items = items
     end
 
     def compartments
-      @items.chars.each_slice(@items.length / 2).map(&:join)
+      items.chars.each_slice(items.length / 2).map(&:join)
       end
 
     def misplaced_item
@@ -19,34 +21,36 @@ module Day3
   end
 
   class Group
+    attr_reader :people
 
     def initialize(people)
       @people = people
     end
 
     def badge
-      @people.first.chars.reduce('') do |repeat, char|
+      people.first.chars.reduce('') do |repeat, char|
         return repeat if repeat.length > 0
-        return char if @people.all? { |person| person.include?(char) }
+        return char if people.all? { |person| person.include?(char) }
         repeat
       end
     end
   end
 
   class Packer
+    attr_reader :file
 
     def initialize(file)
       @file = file
     end
 
     def misplaced_items
-      File.readlines(@file).map do |line|
+      File.readlines(file).map do |line|
         Rucksack.new(line.strip).misplaced_item
       end
     end
 
     def badges
-      File.readlines(@file).each_slice(3).map do |group|
+      File.readlines(file).each_slice(3).map do |group|
         Group.new(group.map(&:strip)).badge
       end
     end

@@ -29,6 +29,8 @@ module Day5
   end
 
   class Loader
+    attr_reader :yard
+
     include (Day5::LoadParser)
 
     def initialize (yard)
@@ -37,10 +39,10 @@ module Day5
 
     def load_stacks(stacks)
       stacks.each_with_index do |stack, index|
-        @yard.push([]) unless @yard[index]
-        @yard[index].unshift(stack.shift) unless stack.empty?
+        yard.push([]) unless yard[index]
+        yard[index].unshift(stack.shift) unless stack.empty?
       end
-      @yard
+      yard
     end
   end
 
@@ -56,6 +58,8 @@ module Day5
   class Mover
     include (Day5::MoveParser)
 
+    attr_reader :yard
+
     def initialize (yard)
       @yard = yard
     end
@@ -64,27 +68,29 @@ module Day5
   class Mover9000 < Mover
     def move (quantity, source, destination)
       while quantity > 0
-        @yard[destination].push(@yard[source].pop)
+        yard[destination].push(yard[source].pop)
         quantity -= 1
       end
-      @yard
+      yard
     end
   end
 
   class Mover9001 < Mover
     def move (quantity, source, destination)
-      @yard[destination].concat(@yard[source].pop(quantity))
-      @yard
+      yard[destination].concat(yard[source].pop(quantity))
+      yard
     end
   end
 
   class InputParser
+    attr_reader :file
+
     def initialize (file)
       @file = file
     end
 
     def sections
-      File.read(@file).split("\n\n")
+      File.read(file).split("\n\n")
     end
 
     def load_commands
@@ -97,7 +103,7 @@ module Day5
   end
 
   class Yard
-    attr_reader :state
+    attr_reader :state, :model_number
 
     def initialize(model_number: 9000)
       @model_number = model_number
@@ -106,9 +112,9 @@ module Day5
 
     def load_stacks(commands)
       commands.each do |command|
-        loader = Day5::Loader.new(@state)
+        loader = Day5::Loader.new(state)
         stacks = loader.parse(command)
-        @state = loader.load_stacks(stacks)
+        state = loader.load_stacks(stacks)
       end
     end
 
@@ -116,21 +122,21 @@ module Day5
       commands.each do |command|
         mover = fetch_mover
         quantity, source, destination = mover.parse(command)
-        @state = mover.move(quantity, source, destination)
+        state = mover.move(quantity, source, destination)
       end
     end
 
     def fetch_mover
-      case @model_number
+      case model_number
       when 9000
-        Day5::Mover9000.new(@state)
+        Day5::Mover9000.new(state)
       when 9001
-        Day5::Mover9001.new(@state)
+        Day5::Mover9001.new(state)
       end
     end
 
     def tops
-      @state.map{ |stack| stack[-1] }
+      state.map{ |stack| stack[-1] }
     end
   end
 end
