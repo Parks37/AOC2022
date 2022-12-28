@@ -37,9 +37,11 @@ module Day2
 
     def scores_for_outcomes
       File.readlines(@file).map do |line|
-        opponent, outcome = line.split(' ').map.with_index{|x,i| i == 0 ? to_shape(x).new : to_outcome(x)}
-        player = opponent.send(outcome)
-        to_shape(player).new.send(opponent.name)
+        opponent_letter, outcome_letter = line.split(' ')
+        opponent = to_shape(opponent_letter).new
+        outcome = to_outcome(outcome_letter)
+        player_key = opponent.send(outcome)
+        to_shape(player_key).new.send(opponent.name)
       end
     end
 

@@ -27,7 +27,8 @@ module Day3
     def badge
       @people.first.chars.reduce('') do |repeat, char|
         return repeat if repeat.length > 0
-        @people.all?{|person| person.include?(char)} ? repeat + char : repeat
+        return char if @people.all? { |person| person.include?(char) }
+        repeat
       end
     end
   end
