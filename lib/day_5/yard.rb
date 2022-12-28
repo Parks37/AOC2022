@@ -31,17 +31,16 @@ module Day5
   class Loader
     include (Day5::LoadParser)
 
-    attr_reader :yard
-
     def initialize (yard)
       @yard = yard
     end
 
-    def load(stacks)
+    def load_stacks(stacks)
       stacks.each_with_index do |stack, index|
         @yard.push([]) unless @yard[index]
         @yard[index].unshift(stack.shift) unless stack.empty?
       end
+      @yard
     end
   end
 
@@ -57,8 +56,6 @@ module Day5
   class Mover
     include (Day5::MoveParser)
 
-    attr_reader :yard
-
     def initialize (yard)
       @yard = yard
     end
@@ -70,22 +67,20 @@ module Day5
         @yard[destination].push(@yard[source].pop)
         quantity -= 1
       end
+      @yard
     end
   end
 
   class Mover9001 < Mover
     def move (quantity, source, destination)
       @yard[destination].concat(@yard[source].pop(quantity))
+      @yard
     end
   end
 
-  class Yard
-    attr_reader :state
-
-    def initialize(file, model_number: 9000)
+  class InputParser
+    def initialize (file)
       @file = file
-      @model_number = model_number
-      @state = []
     end
 
     def sections
@@ -99,23 +94,32 @@ module Day5
     def move_commands
       sections[1].split("\n")
     end
+  end
 
-    def load
+  class Yard
+    attr_reader :state
+
+    def initialize(model_number: 9000)
+      @model_number = model_number
+      @state = []
+    end
+
+    def load_stacks(commands)
       loader = Day5::Loader.new(@state)
-      load_commands.each do |command|
-        loader.load(loader.parse(command))
+      commands.each do |command|
+        @state = loader.load_stacks(loader.parse(command))
       end
     end
 
-    def move
+    def move_boxes(commands)
       case @model_number
       when 9000
         mover = Day5::Mover9000.new(@state)
       when 9001
         mover = Day5::Mover9001.new(@state)
       end
-      move_commands.each do |command|
-        mover.move(*mover.parse(command))
+      commands.each do |command|
+        @state = mover.move(*mover.parse(command))
       end
     end
 
@@ -127,16 +131,18 @@ end
 
 from_file = File.join(File.dirname(__FILE__), 'input.csv')
 
-yard9000 = Day5::Yard.new(from_file)
+input_parser = Day5::InputParser.new(from_file)
 
-yard9000.load
-yard9000.move
+yard = Day5::Yard.new
 
-puts "The tops are #{yard9000.tops.join}"
+yard.load_stacks(input_parser.load_commands)
+yard.move_boxes(input_parser.move_commands)
 
-yard9001 = Day5::Yard.new(from_file, model_number: 9001)
+puts yard.tops.join('')
 
-yard9001.load
-yard9001.move
+yard = Day5::Yard.new(model_number: 9001)
 
-puts "The tops are #{yard9001.tops.join}"
+yard.load_stacks(input_parser.load_commands)
+yard.move_boxes(input_parser.move_commands)
+
+puts yard.tops.join('')

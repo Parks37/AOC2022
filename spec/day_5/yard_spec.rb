@@ -9,12 +9,12 @@ RSpec.describe Day5::Loader do
     it 'loads the yard with stacks' do
       yard = []
       loader = described_class.new(yard)
-      loader.load([['A']])
-      expect(loader.yard).to eq([['A']])
-      loader.load([[],['B'],['C']])
-      expect(loader.yard).to eq([['A'], ['B'], ['C']])
-      loader.load([['D'],[] ,['E']])
-      expect(loader.yard).to eq([['D', 'A'], ['B'], ['E', 'C']])
+      yard = loader.load_stacks([['A']])
+      expect(yard).to eq([['A']])
+      yard = loader.load_stacks([[],['B'],['C']])
+      expect(yard).to eq([['A'], ['B'], ['C']])
+      yard = loader.load_stacks([['D'],[] ,['E']])
+      expect(yard).to eq([['D', 'A'], ['B'], ['E', 'C']])
     end
   end
 
@@ -47,8 +47,8 @@ RSpec.describe Day5::Mover9000 do
     it 'moves a box at a time' do
       yard = [['A','B'], [], ['C']]
       mover = described_class.new(yard)
-      mover.move(2, 0, 1)
-      expect(mover.yard).to eq([[], ['B', 'A'], ['C']])
+      yard = mover.move(2, 0, 1)
+      expect(yard).to eq([[], ['B', 'A'], ['C']])
     end
   end
 end
@@ -58,15 +58,15 @@ RSpec.describe Day5::Mover9001 do
     it 'moves stacks of boxes' do
       yard = [['A','B'], [], ['C']]
       mover = described_class.new(yard)
-      mover.move(2, 0, 1)
-      expect(mover.yard).to eq([[], ['A', 'B'], ['C']])
+      yard = mover.move(2, 0, 1)
+      expect(yard).to eq([[], ['A', 'B'], ['C']])
     end
   end
 end
 
-RSpec.describe Day5::Yard do
+RSpec.describe Day5::InputParser do
   it 'takes a file' do
-    expect(described_class.new('spec/day_5/yard_spec.rb')).to be_a(Day5::Yard)
+    expect(described_class.new(File.join(File.dirname(__FILE__), 'bare.csv'))).to be_a(Day5::InputParser)
   end
 
   context '[:sections]' do
@@ -89,11 +89,21 @@ RSpec.describe Day5::Yard do
       expect(yard.move_commands).to eq(["move 1 from 2 to 1", "move 2 from 1 to 3"])
     end
   end
+end
 
-  context '[:load]' do
+RSpec.describe Day5::Yard do
+  it 'takes an optional model number' do
+    expect(described_class.new).to be_a(Day5::Yard)
+  end
+
+  context '[:load_stacks]' do
     it 'loads the yard with stacks' do
-      yard = described_class.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
-      yard.load
+      parser = Day5::InputParser.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
+      load_commands = parser.load_commands
+      move_commands = parser.move_commands
+
+      yard = described_class.new
+      yard.load_stacks(load_commands)
       expect(yard.state).to eq([["Z", "N"], ["M", "C", "D"], ["P"]])
     end
   end
@@ -101,27 +111,42 @@ RSpec.describe Day5::Yard do
   context '[:move]' do
     context 'when the model_number is 9000'
     it 'moves boxes one at a time' do
-      yard = described_class.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
-      yard.load
-      yard.move
+      parser = Day5::InputParser.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
+      load_commands = parser.load_commands
+      move_commands = parser.move_commands
+
+      yard = described_class.new
+
+      yard.load_stacks(load_commands)
+      yard.move_boxes(move_commands)
       expect(yard.state).to eq([['C'], ['M'], ['P', 'D', 'N', 'Z']])
     end
   end
 
   context 'when the model number is 9001' do
     it 'moves stacks of boxes' do
-      yard = described_class.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'), model_number: 9001)
-      yard.load
-      yard.move
+      parser = Day5::InputParser.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
+      load_commands = parser.load_commands
+      move_commands = parser.move_commands
+
+      yard = described_class.new(model_number: 9001)
+
+      yard.load_stacks(load_commands)
+      yard.move_boxes(move_commands)
       expect(yard.state).to eq([['M'], ['C'], ['P', 'Z', 'N', 'D']])
     end
   end
 
   context '[:tops]' do
     it 'returns the tops of the stacks' do
-      yard = described_class.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
-      yard.load
-      yard.move
+      parser = Day5::InputParser.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
+      load_commands = parser.load_commands
+      move_commands = parser.move_commands
+
+      yard = described_class.new
+
+      yard.load_stacks(load_commands)
+      yard.move_boxes(move_commands)
       expect(yard.tops).to eq(['C', 'M', 'Z'])
     end
   end
