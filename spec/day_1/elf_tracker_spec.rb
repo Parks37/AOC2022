@@ -1,6 +1,29 @@
 require 'byebug'
 require_relative '../../lib/day_1/elf_tracker'
 
+RSpec.describe Day1::Expedition::Elf do
+  it 'has a total_calories method' do
+    expect(described_class.new([])).to respond_to(:total_calories)
+  end
+
+  it 'has a total_calories method that returns the sum of all the calories' do
+    food_items = [10, 20, 30]
+    elf = described_class.new(food_items)
+
+    expect(elf.total_calories).to eq(60)
+  end
+
+  it 'sorts itself by total_calories' do
+    elves = [
+      described_class.new([10]),
+      described_class.new([20]),
+      described_class.new([30])
+    ]
+
+    expect(elves.sort).to eq(elves.sort_by(&:total_calories))
+  end
+end
+
 RSpec.describe Day1::Expedition do
   it 'makes an elf for each entry in the input file'do
     tracker = described_class.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))

@@ -1,4 +1,3 @@
-require_relative 'elf'
 require 'byebug'
 
 module Day1
@@ -6,15 +5,23 @@ module Day1
     attr_reader :elves
 
     def initialize(input_file)
+      @elves = load_elves(input_file)
+    end
 
-      @elves = [Elf.new]
+    Elf = Struct.new(:food_items) do
+      def total_calories
+        food_items.sum
+      end
 
-      File.readlines(input_file).each do |line|
-        if line.match(/(\d+)/)
-          elves[-1].add_food_item($1.to_i)
-        else
-          elves << Elf.new
-        end
+      def <=>(other)
+        total_calories <=> other.total_calories
+      end
+    end
+
+    def load_elves(input_file)
+      File.read(input_file).split("\n\n").map do |bag|
+        food_items = bag.split("\n").map(&:to_i)
+        Elf.new(food_items)
       end
     end
   end
