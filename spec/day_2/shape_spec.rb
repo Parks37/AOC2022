@@ -1,18 +1,19 @@
 require_relative '../../lib/day_2/shape'
+require 'byebug'
+
+class Loser < Day2::Shape
+end
+
+class Winner < Day2::Shape
+end
 
 class TestShape < Day2::Shape
   value 1
-  beats :loser
-  loses_to :winner
+  beats Loser
+  loses_to Winner
 end
 
 RSpec.describe Day2::Shape do
-  context [:name] do
-    it 'returns the name of the shape' do
-      expect(TestShape.new.name).to eq(:testshape)
-    end
-  end
-
   context [:value] do
     it 'will take a value from the child class' do
       expect(TestShape.new.value).to eq(1)
@@ -20,20 +21,20 @@ RSpec.describe Day2::Shape do
   end
 
   context [:beats] do
-    it 'returns the symbol of the shape it beats' do
-      expect(TestShape.new.beats).to eq(:loser)
+    it 'returns an instance of the shape it beats' do
+      expect(TestShape.new.beats).to be_a(Loser)
     end
   end
 
   context [:loses_to] do
-    it 'returns the symbol of the shape it loses to' do
-      expect(TestShape.new.loses_to).to eq(:winner)
+    it 'returns an instance of the shape it loses to' do
+      expect(TestShape.new.loses_to).to be_a(Winner)
     end
   end
 
   context [:ties] do
-    it 'returns the symbol of the shape it ties' do
-      expect(TestShape.new.ties).to eq(:testshape)
+    it 'returns an instance of the shape it ties' do
+      expect(TestShape.new.ties).to be_a(TestShape)
     end
   end
 

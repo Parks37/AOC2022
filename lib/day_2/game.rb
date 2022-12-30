@@ -5,61 +5,86 @@ require 'byebug'
 module Day2
 
   class Rock < Shape
-    value 1
-    beats :scissors
-    loses_to :paper
   end
 
   class Paper < Shape
-    value 2
-    beats :rock
-    loses_to :scissors
   end
 
   class Scissors < Shape
-    value 3
-    beats :paper
-    loses_to :rock
   end
 
-  class Game
+  Rock.value(1)
+  Rock.beats Scissors
+  Rock.loses_to Paper
+
+  Paper.value(2)
+  Paper.beats Rock
+  Paper.loses_to Scissors
+
+  Scissors.value(3)
+  Scissors.beats Paper
+  Scissors.loses_to Rock
+
+  class RoundInput
     attr_reader :file
 
     def initialize(file)
       @file = file
     end
 
-    def scores_for_shapes
+    def to_a
       File.readlines(file).map do |line|
-        opponent, player = line.split(' ').map{|x| to_shape(x).new}
-        player.send(opponent.name)
+        line.strip.split(' ')
       end
     end
+  end
 
-    def scores_for_outcomes
-      File.readlines(file).map do |line|
-        opponent_letter, outcome_letter = line.split(' ')
-        opponent = to_shape(opponent_letter).new
-        outcome = to_outcome(outcome_letter)
-        player_key = opponent.send(outcome)
-        to_shape(player_key).new.send(opponent.name)
-      end
+  class Opponent
+    attr_reader :key
+
+    def initialize(key)
+      @key = key
     end
 
-    private
-
-    def to_shape(key)
+    def to_shape
       case key
-      when 'A', 'X', :rock
-        Rock
-      when 'B', 'Y', :paper
-        Paper
-      when 'C', 'Z', :scissors
-        Scissors
+      when 'A'
+        Rock.new
+      when 'B'
+        Paper.new
+      when 'C'
+        Scissors.new
       end
     end
+  end
 
-    def to_outcome(key)
+  class Player
+    attr_reader :key
+
+    def initialize(key)
+      @key = key
+    end
+
+    def to_shape
+      case key
+      when 'X'
+        Rock.new
+      when 'Y'
+        Paper.new
+      when 'Z'
+        Scissors.new
+      end
+    end
+  end
+
+  class Outcome
+    attr_reader :key
+
+    def initialize(key)
+      @key = key
+    end
+
+    def to_s
       case key
       when 'X'
         :beats
@@ -70,14 +95,61 @@ module Day2
       end
     end
   end
+
+  class Game
+    attr_reader :player, :opponent
+
+    def initialize(player, opponent)
+      @player = player
+      @opponent = opponent
+    end
+
+    def score
+      player.send(opponent.to_symbol)
+    end
+  end
+
+  class GameInput
+    attr_reader :array
+
+    def initialize(array)
+      @array = array
+    end
+
+    def opponent
+      Opponent.new(array[0]).to_shape
+    end
+
+    def player
+      Player.new(array[1]).to_shape
+    end
+
+    def outcome
+      Outcome.new(array[1]).to_s
+    end
+  end
+
+
 end
 
 from_file = File.join(File.dirname(__FILE__), 'input.csv')
 
-game = Day2::Game.new(from_file)
+round_input = Day2::RoundInput.new(from_file)
 
-puts "The scores for the shapes are #{game.scores_for_shapes.sum}."
+scores = round_input.to_a.map do |game_input|
+  game_input = Day2::GameInput.new(game_input)
+  game = Day2::Game.new(game_input.player, game_input.opponent)
+  game.score
+end
 
-puts "The scores for the outcomes are #{game.scores_for_outcomes.sum}."
+puts scores.sum
 
+scores = round_input.to_a.map do |game_input|
+  game_input = Day2::GameInput.new(game_input)
+  player = game_input.opponent.send(game_input.outcome)
+  game = Day2::Game.new(player, game_input.opponent)
+  game.score
+end
+
+puts scores.sum
 
