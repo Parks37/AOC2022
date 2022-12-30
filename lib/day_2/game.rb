@@ -84,7 +84,7 @@ module Day2
       @key = key
     end
 
-    def to_s
+    def to_symbol
       case key
       when 'X'
         :beats
@@ -125,7 +125,7 @@ module Day2
     end
 
     def outcome
-      Outcome.new(array[1]).to_s
+      Outcome.new(array[1]).to_symbol
     end
   end
 

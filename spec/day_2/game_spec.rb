@@ -65,9 +65,9 @@ RSpec.describe Day2::Outcome do
 
   context '[:to_s]' do
     it 'returns a string' do
-      expect(described_class.new('X').to_s).to eq(:beats)
-      expect(described_class.new('Y').to_s).to eq(:ties)
-      expect(described_class.new('Z').to_s).to eq(:loses_to)
+      expect(described_class.new('X').to_symbol).to eq(:beats)
+      expect(described_class.new('Y').to_symbol).to eq(:ties)
+      expect(described_class.new('Z').to_symbol).to eq(:loses_to)
     end
   end
 end
