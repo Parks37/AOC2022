@@ -4,14 +4,14 @@ require 'byebug'
 
 RSpec.describe Day2::RoundInput do
   it 'takes a file' do
-    round_input = Day2::RoundInput.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
-    expect(round_input).to be_a(described_class)
+    from_file = File.join(File.dirname(__FILE__), 'dummy_input.csv')
+    expect(Day2::RoundInput.new(from_file).file).to eq(from_file)
   end
 
   context '[:to_a]' do
     it 'returns an array of the input' do
-      round_input = Day2::RoundInput.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
-      expect(round_input.to_a).to eq([['A', 'Y'], ['B', 'X'], ['C', 'Z']])
+      from_file = File.join(File.dirname(__FILE__), 'dummy_input.csv')
+      expect(Day2::RoundInput.new(from_file).to_a).to eq([['A', 'Y'], ['B', 'X'], ['C', 'Z']])
     end
   end
 end
@@ -23,9 +23,9 @@ RSpec.describe Day2::Opponent do
 
   context '[:to_shape]' do
     it 'returns an instance of the shape' do
-      expect(described_class.new('A').to_shape).to be_a(Day2::Rock)
-      expect(described_class.new('B').to_shape).to be_a(Day2::Paper)
-      expect(described_class.new('C').to_shape).to be_a(Day2::Scissors)
+      expect(described_class.new('A').shape).to be_a(Day2::Rock)
+      expect(described_class.new('B').shape).to be_a(Day2::Paper)
+      expect(described_class.new('C').shape).to be_a(Day2::Scissors)
     end
   end
 end
@@ -37,9 +37,9 @@ RSpec.describe Day2::Player do
 
   context '[:to_shape]' do
     it 'returns a shape' do
-      expect(described_class.new('X').to_shape).to be_a(Day2::Rock)
-      expect(described_class.new('Y').to_shape).to be_a(Day2::Paper)
-      expect(described_class.new('Z').to_shape).to be_a(Day2::Scissors)
+      expect(described_class.new('X').shape).to be_a(Day2::Rock)
+      expect(described_class.new('Y').shape).to be_a(Day2::Paper)
+      expect(described_class.new('Z').shape).to be_a(Day2::Scissors)
     end
   end
 end
@@ -72,9 +72,9 @@ RSpec.describe Day2::Outcome do
   end
 end
 
-RSpec.describe Day2::GameInput do
+RSpec.describe Day2::ShapeChoice do
   it 'takes an array' do
-    expect(described_class.new(['A', 'Y'])).to be_a(described_class)
+    expect(described_class.new(['A', 'Y']).players).to eq(['A', 'Y'])
   end
 
   context '[:opponent]' do
@@ -89,9 +89,58 @@ RSpec.describe Day2::GameInput do
     end
   end
 
-  context '[:outcome]' do
-    it 'returns an outcome' do
-      expect(described_class.new(['A', 'Y']).outcome).to eq(:ties)
+  # context '[:outcome]' do
+  #   it 'returns an outcome' do
+  #     expect(described_class.new(['A', 'Y']).outcome).to eq(:ties)
+  #   end
+  # end
+end
+
+RSpec.describe Day2::ShapeChooser do
+  it 'takes a file' do
+    from_file = File.join(File.dirname(__FILE__), 'dummy_input.csv')
+    expect(Day2::ShapeChooser.new(from_file)).to be_a(Day2::ShapeChooser)
+  end
+
+  context '[:games]' do
+    it 'returns an array of games' do
+      from_file = File.join(File.dirname(__FILE__), 'dummy_input.csv')
+      games = described_class.new(from_file).games
+      expect(games).to be_a(Array)
+    end
+
+    it 'returns the correct players for each game' do
+      from_file = File.join(File.dirname(__FILE__), 'dummy_input.csv')
+      games = described_class.new(from_file).games
+      first_game = games.first
+      expect(first_game.player).to be_a(Day2::Paper)
+      expect(first_game.opponent).to be_a(Day2::Rock)
+
+      second_game = games[1]
+      expect(second_game.player).to be_a(Day2::Rock)
+      expect(second_game.opponent).to be_a(Day2::Paper)
+
+      third_game = games[2]
+      expect(third_game.player).to be_a(Day2::Scissors)
+      expect(third_game.opponent).to be_a(Day2::Scissors)
+    end
+  end
+end
+
+RSpec.describe Day2::OutcomeChoice do
+  it 'takes a opponent key and outcome key' do
+    expect(described_class.new(['A', 'Y'])).to be_a(described_class)
+  end
+
+  context '[:oppoent]' do
+    it 'returns an opponent' do
+      expect(described_class.new(['A', 'Y']).opponent).to be_a(Day2::Rock)
+    end
+  end
+
+  context '[:player]' do
+    it 'returns a player' do
+      expect(described_class.new(['A', 'Y']).player).to be_a(Day2::Rock)
     end
   end
 end

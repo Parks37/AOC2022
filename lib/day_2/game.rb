@@ -25,47 +25,8 @@ module Day2
   Scissors.beats Paper
   Scissors.loses_to Rock
 
-  class RoundInput
-    attr_reader :file
-
-    def initialize(file)
-      @file = file
-    end
-
-    def to_a
-      File.readlines(file).map do |line|
-        line.strip.split(' ')
-      end
-    end
-  end
-
-  class Opponent
-    attr_reader :key
-
-    def initialize(key)
-      @key = key
-    end
-
-    def to_shape
-      case key
-      when 'A'
-        Rock.new
-      when 'B'
-        Paper.new
-      when 'C'
-        Scissors.new
-      end
-    end
-  end
-
-  class Player
-    attr_reader :key
-
-    def initialize(key)
-      @key = key
-    end
-
-    def to_shape
+  Player = Struct.new(:key) do
+    def shape
       case key
       when 'X'
         Rock.new
@@ -77,13 +38,20 @@ module Day2
     end
   end
 
-  class Outcome
-    attr_reader :key
-
-    def initialize(key)
-      @key = key
+  Opponent = Struct.new(:key) do
+    def shape
+      case key
+      when 'A'
+        Rock.new
+      when 'B'
+        Paper.new
+      when 'C'
+        Scissors.new
+      end
     end
+  end
 
+  Outcome = Struct.new(:key) do
     def to_symbol
       case key
       when 'X'
@@ -96,60 +64,79 @@ module Day2
     end
   end
 
-  class Game
-    attr_reader :player, :opponent
+  RoundInput = Struct.new(:file) do
+    def to_a
+      File.readlines(file).map do |line|
+        line.split(' ')
+      end
+    end
+  end
 
-    def initialize(player, opponent)
-      @player = player
-      @opponent = opponent
+  ShapeChoice = Struct.new(:players) do
+    def opponent
+      Opponent.new(players.first).shape
     end
 
+    def player
+      Player.new(players.last).shape
+    end
+  end
+
+  OutcomeChoice = Struct.new(:keys) do
+    def opponent
+      Opponent.new(keys.first).shape
+    end
+
+    def player
+      outcome = Outcome.new(keys.last)
+      opponent.send(outcome.to_symbol)
+    end
+  end
+
+  Game = Struct.new(:player, :opponent) do
     def score
       player.send(opponent.to_symbol)
     end
   end
 
-  class GameInput
-    attr_reader :array
+  class ShapeChooser
+    attr_reader :games
 
-    def initialize(array)
-      @array = array
+    def initialize(file_path)
+      @games = parse_round(file_path)
     end
 
-    def opponent
-      Opponent.new(array[0]).to_shape
-    end
-
-    def player
-      Player.new(array[1]).to_shape
-    end
-
-    def outcome
-      Outcome.new(array[1]).to_symbol
+    def parse_round(file_path)
+      RoundInput.new(file_path).to_a.map do |shape_keys|
+        game_input = ShapeChoice.new(shape_keys)
+        Game.new(game_input.player, game_input.opponent)
+      end
     end
   end
 
+  class OutcomeChooser
+    attr_reader :games
 
+    def initialize(file_path)
+      @games = parse_round(file_path)
+    end
+
+    def parse_round(file_path)
+      RoundInput.new(file_path).to_a.map do |keys|
+        game_input = OutcomeChoice.new(keys)
+        Game.new(game_input.player, game_input.opponent)
+      end
+    end
+  end
 end
 
 from_file = File.join(File.dirname(__FILE__), 'input.csv')
 
-round_input = Day2::RoundInput.new(from_file)
+shape_chooser = Day2::ShapeChooser.new(from_file)
 
-scores = round_input.to_a.map do |game_input|
-  game_input = Day2::GameInput.new(game_input)
-  game = Day2::Game.new(game_input.player, game_input.opponent)
-  game.score
-end
+puts shape_chooser.games.map(&:score).inject(:+)
 
-puts scores.sum
+outcome_chooser = Day2::OutcomeChooser.new(from_file)
 
-scores = round_input.to_a.map do |game_input|
-  game_input = Day2::GameInput.new(game_input)
-  player = game_input.opponent.send(game_input.outcome)
-  game = Day2::Game.new(player, game_input.opponent)
-  game.score
-end
-
-puts scores.sum
+puts outcome_chooser.games.map(&:score).inject(:+)
 
