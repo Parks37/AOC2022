@@ -88,12 +88,6 @@ RSpec.describe Day2::ShapeChoice do
       expect(described_class.new(['A', 'Y']).player).to be_a(Day2::Paper)
     end
   end
-
-  # context '[:outcome]' do
-  #   it 'returns an outcome' do
-  #     expect(described_class.new(['A', 'Y']).outcome).to eq(:ties)
-  #   end
-  # end
 end
 
 RSpec.describe Day2::ShapeChooser do
@@ -141,6 +135,37 @@ RSpec.describe Day2::OutcomeChoice do
   context '[:player]' do
     it 'returns a player' do
       expect(described_class.new(['A', 'Y']).player).to be_a(Day2::Rock)
+    end
+  end
+end
+
+RSpec.describe Day2::OutcomeChooser do
+  it 'takes a file' do
+    from_file = File.join(File.dirname(__FILE__), 'dummy_input.csv')
+    expect(Day2::OutcomeChooser.new(from_file)).to be_a(Day2::OutcomeChooser)
+  end
+
+  context '[:games]' do
+    it 'returns an array of games' do
+      from_file = File.join(File.dirname(__FILE__), 'dummy_input.csv')
+      games = described_class.new(from_file).games
+      expect(games).to be_a(Array)
+    end
+
+    it 'returns the correct players for each game' do
+      from_file = File.join(File.dirname(__FILE__), 'dummy_input.csv')
+      games = described_class.new(from_file).games
+      first_game = games.first
+      expect(first_game.player).to be_a(Day2::Rock)
+      expect(first_game.opponent).to be_a(Day2::Rock)
+
+      second_game = games[1]
+      expect(second_game.player).to be_a(Day2::Rock)
+      expect(second_game.opponent).to be_a(Day2::Paper)
+
+      third_game = games[2]
+      expect(third_game.player).to be_a(Day2::Rock)
+      expect(third_game.opponent).to be_a(Day2::Scissors)
     end
   end
 end

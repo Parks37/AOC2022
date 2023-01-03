@@ -1,7 +1,7 @@
 require 'byebug'
 require_relative '../../lib/day_1/elf_tracker'
 
-RSpec.describe Day1::Expedition::Elf do
+RSpec.describe Day1::Elf do
   it 'has a total_calories method' do
     expect(described_class.new([])).to respond_to(:total_calories)
   end
@@ -21,6 +21,18 @@ RSpec.describe Day1::Expedition::Elf do
     ]
 
     expect(elves.sort).to eq(elves.sort_by(&:total_calories))
+  end
+end
+
+RSpec.describe Day1::BagInput do
+  it 'has a to_i method' do
+    expect(described_class.new('')).to respond_to(:to_i)
+  end
+
+  it 'has a to_i method that returns an array of integers' do
+    bag = described_class.new("1\n2\n3")
+
+    expect(bag.to_i).to eq([1, 2, 3])
   end
 end
 

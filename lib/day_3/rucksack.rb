@@ -15,7 +15,7 @@ module Day3
     def misplaced_item
       compartments.first.chars.reduce('') do |repeat, char|
         return repeat if repeat.length > 0
-        compartments.last.include?(char) ? repeat + char : repeat
+        compartments.last.include?(char) ? char : repeat
       end
     end
   end
