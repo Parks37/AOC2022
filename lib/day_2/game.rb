@@ -70,6 +70,13 @@ module Day2
         line.split(' ')
       end
     end
+
+    def games(choice)
+      to_a.map do |keys|
+        game_input = choice.new(keys)
+        Game.new(game_input.player, game_input.opponent)
+      end
+    end
   end
 
   ShapeChoice = Struct.new(:players) do
@@ -98,45 +105,15 @@ module Day2
       player.send(opponent.to_symbol)
     end
   end
-
-  class ShapeChooser
-    attr_reader :games
-
-    def initialize(file_path)
-      @games = parse_round(file_path)
-    end
-
-    def parse_round(file_path)
-      RoundInput.new(file_path).to_a.map do |shape_keys|
-        game_input = ShapeChoice.new(shape_keys)
-        Game.new(game_input.player, game_input.opponent)
-      end
-    end
-  end
-
-  class OutcomeChooser
-    attr_reader :games
-
-    def initialize(file_path)
-      @games = parse_round(file_path)
-    end
-
-    def parse_round(file_path)
-      RoundInput.new(file_path).to_a.map do |keys|
-        game_input = OutcomeChoice.new(keys)
-        Game.new(game_input.player, game_input.opponent)
-      end
-    end
-  end
 end
 
 from_file = File.join(File.dirname(__FILE__), 'input.csv')
 
-shape_chooser = Day2::ShapeChooser.new(from_file)
+round_input = Day2::RoundInput.new(from_file)
 
-puts shape_chooser.games.map(&:score).inject(:+)
+puts round_input.games(Day2::ShapeChoice).map(&:score).sum
 
-outcome_chooser = Day2::OutcomeChooser.new(from_file)
+puts round_input.games(Day2::OutcomeChoice).map(&:score).sum
 
-puts outcome_chooser.games.map(&:score).inject(:+)
+
 
