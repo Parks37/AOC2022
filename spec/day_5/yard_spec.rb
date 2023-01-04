@@ -71,6 +71,14 @@ RSpec.describe Day5::YardInstructions do
 
     expect(yard_instructions.move_instructions.parse.length).to eq(4)
   end
+
+  context '[:tops]' do
+    it 'returns the tops of the stacks' do
+      yard_instructions = described_class.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))
+      expect(yard_instructions.tops).to eq('CMZ')
+      expect(yard_instructions.tops(model_number: 9001)).to eq('MCD')
+    end
+  end
 end
 
 RSpec.describe Day5::Yard do
@@ -89,22 +97,8 @@ RSpec.describe Day5::Yard do
   end
 
   context '[:move_boxes]' do
-    context 'when the model_number is 9000' do
-      it 'moves boxes one at a time' do
-        yard = described_class.new
-
-        yard.load_stacks(Day5::LoadInstruction.new('[A] [B] [C]'))
-        yard.load_stacks(Day5::LoadInstruction.new('[D] [E] [F]'))
-        yard.move_boxes(Day5::MoveInstruction.new('move 1 from 2 to 1'))
-        expect(yard.stacks).to eq([['D', 'A', 'B'], ['E'], ['F', 'C']])
-        yard.move_boxes(Day5::MoveInstruction.new('move 2 from 1 to 3'))
-        expect(yard.stacks).to eq([['D'], ['E'], ['F', 'C', 'B', 'A']])
-      end
-    end
-
-    context 'when the model_number is 9001' do
       it 'moves stacks of boxes' do
-        yard = described_class.new(model_number: 9001)
+        yard = described_class.new
 
         yard.load_stacks(Day5::LoadInstruction.new('[A] [B] [C]'))
         yard.load_stacks(Day5::LoadInstruction.new('[D] [E] [F]'))
@@ -113,20 +107,6 @@ RSpec.describe Day5::Yard do
         yard.move_boxes(Day5::MoveInstruction.new('move 2 from 1 to 3'))
         expect(yard.stacks).to eq([['D'], ['E'], ['F', 'C', 'A', 'B']])
       end
-    end
-  end
-end
-
-RSpec.describe Day5::TopFinder do
-  it 'takes a yard_instructions' do
-    expect(described_class.new(Day5::YardInstructions.new(File.join(File.dirname(__FILE__), 'dummy_input.csv')))).to be_a(Day5::TopFinder)
-  end
-
-  context '[:tops]' do
-    it 'returns the tops of the stacks' do
-      expect(described_class.new(Day5::YardInstructions.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))).tops).to eq('CMZ')
-      expect(described_class.new(Day5::YardInstructions.new(File.join(File.dirname(__FILE__), 'dummy_input.csv'))).tops(model_number: 9001)).to eq('MCD')
-    end
   end
 end
 

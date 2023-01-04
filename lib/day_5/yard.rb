@@ -1,11 +1,10 @@
 module Day5
 
   class Yard
-    attr_reader :stacks, :model_number
+    attr_reader :stacks
 
-    def initialize(model_number: 9000)
+    def initialize
       @stacks = []
-      @model_number = model_number
     end
 
     def load_stacks(load_instruction)
@@ -17,12 +16,7 @@ module Day5
 
     def move_boxes(move_instruction)
       quantity, source, destination = move_instruction.values_at(:quantity, :source, :destination)
-      case model_number
-      when 9000
-        quantity.times { stacks[destination].push(stacks[source].pop) }
-      when 9001
-        stacks[destination].concat(stacks[source].pop(quantity))
-      end
+      stacks[destination].concat(stacks[source].pop(quantity))
     end
 
     def tops
@@ -112,20 +106,20 @@ module Day5
     def move_instructions
       MoveInstructions.new(sections[1])
     end
-  end
-
-  TopFinder = Struct.new(:yard_instructions) do
 
     def tops(model_number: 9000)
-      yard = Day5::Yard.new(model_number: model_number)
-      yard_instructions.load_instructions.parse.each do |instruction|
-        yard.load_stacks(instruction)
-      end
+      yard = Yard.new
+      load_instructions.parse.each { |load_instruction| yard.load_stacks(load_instruction) }
 
-      yard_instructions.move_instructions.parse.each do |instruction|
-        yard.move_boxes(instruction)
+      move_instructions.parse.each do |move_instruction|
+        quantity, source, destination = move_instruction.values_at(:quantity, :source, :destination)
+        case model_number
+        when 9000
+          quantity.times { yard.move_boxes({quantity: 1, source: source, destination: destination}) }
+        when 9001
+          yard.move_boxes(move_instruction)
+        end
       end
-
       yard.tops.join
     end
   end
@@ -135,11 +129,10 @@ end
 
 from_file = File.join(File.dirname(__FILE__), 'input.csv')
 
-yard_instructions = Day5::YardInstructions.new(from_file)
+puts "The outcome for the Mover9000: " + Day5::YardInstructions.new(from_file).tops
 
-puts Day5::TopFinder.new(yard_instructions).tops
+puts "The outcome for the Mover9001: " + Day5::YardInstructions.new(from_file).tops(model_number: 9001)
 
-puts Day5::TopFinder.new(yard_instructions).tops(model_number: 9001)
 
 
 

@@ -111,9 +111,9 @@ from_file = File.join(File.dirname(__FILE__), 'input.csv')
 
 round_input = Day2::RoundInput.new(from_file)
 
-puts round_input.games(Day2::ShapeChoice).map(&:score).sum
+puts "Day2 Part 1: #{round_input.games(Day2::ShapeChoice).map(&:score).sum}"
 
-puts round_input.games(Day2::OutcomeChoice).map(&:score).sum
+puts "Day2 Part 2: #{round_input.games(Day2::OutcomeChoice).map(&:score).sum}"
 
 
 
