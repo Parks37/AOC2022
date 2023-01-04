@@ -1,7 +1,39 @@
 module Day5
-  module LoadParser
-    def parse (string)
-      full_string = swap_spaces_for_empty_boxes(string)
+
+  class Yard
+    attr_reader :stacks, :model_number
+
+    def initialize(model_number: 9000)
+      @stacks = []
+      @model_number = model_number
+    end
+
+    def load_stacks(load_instruction)
+      load_instruction.stacks.each_with_index do |stack, index|
+        stacks.push([]) unless stacks[index]
+        stacks[index].unshift(stack.shift) unless stack.empty?
+      end
+    end
+
+    def move_boxes(move_instruction)
+      quantity, source, destination = move_instruction.values_at(:quantity, :source, :destination)
+      case model_number
+      when 9000
+        quantity.times { stacks[destination].push(stacks[source].pop) }
+      when 9001
+        stacks[destination].concat(stacks[source].pop(quantity))
+      end
+    end
+
+    def tops
+      stacks.map(&:last)
+    end
+  end
+
+
+  LoadInstruction = Struct.new(:instruction) do
+    def stacks
+      full_string = swap_spaces_for_empty_boxes(instruction)
       boxes_seperated_by_pipes = swap_spaces_for_pipes(full_string)
       boxes_seperated_by_single_pipe = swap_multiple_pipes_for_single_pipe(boxes_seperated_by_pipes)
       remove_proceeding_pipe = remove_proceeding_pipe(boxes_seperated_by_single_pipe)
@@ -28,133 +60,89 @@ module Day5
     end
   end
 
-  class Loader
-    attr_reader :yard
-
-    include (Day5::LoadParser)
-
-    def initialize (yard)
-      @yard = yard
+  MoveInstruction = Struct.new(:instruction) do
+    def to_a
+      instruction.match(/move (\d+) from (\d+) to (\d+)/)
+      [$1.to_i, $2.to_i, $3.to_i]
     end
 
-    def load_stacks(stacks)
-      stacks.each_with_index do |stack, index|
-        yard.push([]) unless yard[index]
-        yard[index].unshift(stack.shift) unless stack.empty?
+    def quantity
+      to_a[0]
+    end
+
+    def source
+      to_a[1] - 1
+    end
+
+    def destination
+      to_a[2] - 1
+    end
+
+    def values_at(*attributes)
+      attributes.map { |attribute| send(attribute) }
+    end
+  end
+
+  LoadInstructions = Struct.new(:instructions) do
+    def parse
+      instructions.split("\n").filter{ |line| line.match(/[A-z]/) }.map do |instruction|
+        LoadInstruction.new(instruction)
       end
-      yard
     end
   end
 
-  module MoveParser
-    def parse (string)
-      words = string.strip.split(' ')
-      numbers_string = words.filter{ |word| word.match(/[1-9]/) }
-      quantity, from, to = numbers_string.map(&:to_i)
-      [quantity, from-1, to-1]
-    end
-  end
-
-  class Mover
-    include (Day5::MoveParser)
-
-    attr_reader :yard
-
-    def initialize (yard)
-      @yard = yard
-    end
-  end
-
-  class Mover9000 < Mover
-    def move (quantity, source, destination)
-      while quantity > 0
-        yard[destination].push(yard[source].pop)
-        quantity -= 1
+  MoveInstructions = Struct.new(:instructions) do
+    def parse
+      instructions.split("\n").filter{ |line| line.match(/move/) }.map do |instruction|
+        MoveInstruction.new(instruction)
       end
-      yard
     end
   end
 
-  class Mover9001 < Mover
-    def move (quantity, source, destination)
-      yard[destination].concat(yard[source].pop(quantity))
-      yard
-    end
-  end
-
-  class InputParser
-    attr_reader :file
-
-    def initialize (file)
-      @file = file
-    end
+  YardInstructions = Struct.new(:from_file) do
 
     def sections
-      File.read(file).split("\n\n")
+      File.read(from_file).split("\n\n")
     end
 
-    def load_commands
-      sections[0].split("\n").filter{ |line| line.match(/[A-z]/) }
+    def load_instructions
+      LoadInstructions.new(sections[0])
     end
 
-    def move_commands
-      sections[1].split("\n")
+    def move_instructions
+      MoveInstructions.new(sections[1])
     end
   end
 
-  class Yard
-    attr_reader :state, :model_number
+  TopFinder = Struct.new(:yard_instructions) do
 
-    def initialize(model_number: 9000)
-      @model_number = model_number
-      @state = []
-    end
-
-    def load_stacks(commands)
-      commands.each do |command|
-        loader = Day5::Loader.new(state)
-        stacks = loader.parse(command)
-        state = loader.load_stacks(stacks)
+    def tops(model_number: 9000)
+      yard = Day5::Yard.new(model_number: model_number)
+      yard_instructions.load_instructions.parse.each do |instruction|
+        yard.load_stacks(instruction)
       end
-    end
 
-    def move_boxes(commands)
-      commands.each do |command|
-        mover = fetch_mover
-        quantity, source, destination = mover.parse(command)
-        state = mover.move(quantity, source, destination)
+      yard_instructions.move_instructions.parse.each do |instruction|
+        yard.move_boxes(instruction)
       end
-    end
 
-    def fetch_mover
-      case model_number
-      when 9000
-        Day5::Mover9000.new(state)
-      when 9001
-        Day5::Mover9001.new(state)
-      end
-    end
-
-    def tops
-      state.map{ |stack| stack[-1] }
+      yard.tops.join
     end
   end
 end
 
+
+
 from_file = File.join(File.dirname(__FILE__), 'input.csv')
 
-input_parser = Day5::InputParser.new(from_file)
+yard_instructions = Day5::YardInstructions.new(from_file)
 
-yard = Day5::Yard.new
+puts Day5::TopFinder.new(yard_instructions).tops
 
-yard.load_stacks(input_parser.load_commands)
-yard.move_boxes(input_parser.move_commands)
+puts Day5::TopFinder.new(yard_instructions).tops(model_number: 9001)
 
-puts yard.tops.join('')
 
-yard = Day5::Yard.new(model_number: 9001)
 
-yard.load_stacks(input_parser.load_commands)
-yard.move_boxes(input_parser.move_commands)
 
-puts yard.tops.join('')
+
+
