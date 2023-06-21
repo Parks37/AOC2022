@@ -71,15 +71,15 @@ module Day2
       end
     end
 
-    def games(choice)
+    def outcomes(gameStruct)
       to_a.map do |keys|
-        game_input = choice.new(keys)
+        game_input = gameStruct.new(keys)
         Game.new(game_input.player, game_input.opponent)
       end
     end
   end
 
-  ShapeChoice = Struct.new(:players) do
+  Part1Game = Struct.new(:players) do
     def opponent
       Opponent.new(players.first).shape
     end
@@ -89,7 +89,7 @@ module Day2
     end
   end
 
-  OutcomeChoice = Struct.new(:keys) do
+  Part2Game = Struct.new(:keys) do
     def opponent
       Opponent.new(keys.first).shape
     end
@@ -111,9 +111,9 @@ from_file = File.join(File.dirname(__FILE__), 'input.csv')
 
 round_input = Day2::RoundInput.new(from_file)
 
-puts "Day2 Part 1: #{round_input.games(Day2::ShapeChoice).map(&:score).sum}"
+puts "Day2 Part 1: #{round_input.outcomes(Day2::Part1Game).map(&:score).sum}"
 
-puts "Day2 Part 2: #{round_input.games(Day2::OutcomeChoice).map(&:score).sum}"
+puts "Day2 Part 2: #{round_input.outcomes(Day2::Part2Game).map(&:score).sum}"
 
 
 
